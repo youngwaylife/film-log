@@ -1,0 +1,79 @@
+.star-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 2.5rem; /* Slightly larger */
+  cursor: pointer;
+  user-select: none;
+}
+
+.star {
+  position: relative;
+  display: inline-block;
+  color: var(--bg-color-light); /* Inner color matches background when empty */
+  -webkit-text-stroke: 3px var(--text-color-light); /* Thicker outline */
+  transition: transform 0.1s;
+}
+
+/* For empty state in light/dark mode */
+@media (prefers-color-scheme: dark) {
+  .star {
+    color: var(--bg-color-dark);
+    -webkit-text-stroke: 3px var(--text-color-dark);
+  }
+}
+
+.star.full {
+  color: var(--text-color-light);
+  -webkit-text-stroke: 3px var(--text-color-light);
+}
+
+@media (prefers-color-scheme: dark) {
+  .star.full {
+    color: var(--text-color-dark);
+    -webkit-text-stroke: 3px var(--text-color-dark);
+  }
+}
+
+/* The half star trick using pseudo-element */
+.star.half {
+   color: var(--bg-color-light); /* Empty base */
+}
+
+@media (prefers-color-scheme: dark) {
+  .star.half {
+    color: var(--bg-color-dark);
+  }
+}
+
+.star.half::before {
+  content: '★';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 50%; /* Show only exactly half */
+  overflow: hidden;
+  color: var(--text-color-light); /* Filled color */
+  -webkit-text-stroke: 3px var(--text-color-light);
+}
+
+@media (prefers-color-scheme: dark) {
+  .star.half::before {
+    color: var(--text-color-dark);
+    -webkit-text-stroke: 3px var(--text-color-dark);
+  }
+}
+
+.rating-value {
+  margin-left: 1rem;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--text-color-light);
+  min-width: 2.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .rating-value {
+    color: var(--text-color-dark);
+  }
+}
