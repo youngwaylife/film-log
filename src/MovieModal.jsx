@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
 import StarRating from './StarRating';
+import { getMovieCredits } from './tmdb';
 import './MovieModal.css';
 
 const MovieModal = ({ movie, onClose, onAdd }) => {
@@ -9,6 +10,18 @@ const MovieModal = ({ movie, onClose, onAdd }) => {
   const [theater, setTheater] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [saving, setSaving] = useState(false);
+  const [director, setDirector] = useState('');
+
+  useEffect(() => {
+    if (movie && movie.id) {
+      getMovieCredits(movie.id).then(credits => {
+        if (credits && credits.crew) {
+          const dir = credits.crew.find(person => person.job === 'Director');
+          if (dir) setDirector(dir.name);
+        }
+      });
+    }
+  }, [movie]);
 
   if (!movie) return null;
 
@@ -67,7 +80,10 @@ const MovieModal = ({ movie, onClose, onAdd }) => {
           />
           <div className="modal-title-area">
             <h2>{movie.title}</h2>
-            <p className="modal-year">{movie.release_date?.substring(0,4)}</p>
+            <p className="modal-year">
+              {movie.release_date?.substring(0,4)}
+              {director && ` • Dir. ${director}`}
+            </p>
           </div>
         </div>
 
