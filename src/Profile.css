@@ -1,83 +1,38 @@
-.profile-error {
-  text-align: center;
-  margin-top: 10rem;
-}
-
-.back-link {
-  color: var(--text-color-light);
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  font-weight: 800;
-  margin-top: 1rem;
-  display: inline-block;
-}
-
-@media (prefers-color-scheme: dark) {
-  .back-link {
-    color: var(--text-color-dark);
-  }
-}
-
-.logo-link {
-  text-decoration: none;
-  color: inherit;
-}
-
-.shared-profile-section {
-  text-align: center;
-  margin-bottom: 5rem;
+.follow-stats {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.profile-header-info {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.avatar-large {
-  width: 100px;
-  height: 100px;
-  border-radius: 0; /* Square */
-  background-color: var(--text-color-light);
-  color: var(--bg-color-light);
-  display: flex;
+  gap: 20px;
   justify-content: center;
-  align-items: center;
-  font-size: 3rem;
-  font-weight: 900;
-  margin-bottom: 1.5rem;
-  overflow: hidden;
-  border: 4px solid var(--text-color-light);
+  margin: 15px 0;
+  font-size: 0.95rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  .avatar-large {
-    background-color: var(--text-color-dark);
-    color: var(--bg-color-dark);
-    border: 4px solid var(--text-color-dark);
-  }
+.follow-stats span {
+  color: #ccc;
 }
 
-.avatar-large img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.follow-stats strong {
+  color: #fff;
+  font-size: 1.1rem;
 }
 
-.shared-profile-section h2 {
-  font-size: 3.5rem;
-  font-weight: 900;
-  margin: 0 0 1rem 0;
-  text-transform: uppercase;
-  letter-spacing: -0.02em;
-}
-
-.shared-bio {
-  font-size: 1.3rem;
+.follow-btn {
+  background: transparent;
+  color: #fff;
+  border: 1px solid #fff;
+  padding: 8px 24px;
+  font-family: inherit;
   font-weight: 600;
-  max-width: 600px;
-  line-height: 1.5;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 5px;
+}
+
+.follow-btn:hover {
+  background: #222;
+}
+
+.follow-btn.following {
+  background: #fff;
+  color: #000;
 }

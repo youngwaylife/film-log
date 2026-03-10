@@ -4,13 +4,12 @@ import { searchMovies } from './tmdb';
 import MovieModal from './MovieModal';
 import ProfileModal from './ProfileModal';
 import Feed from './Feed';
+import Archive from './Archive';
 import { AuthContext } from './AuthContext';
 import './App.css';
 
 function App() {
   const session = useContext(AuthContext);
-  const [movies, setMovies] = useState([]);
-  const [loading, setLoading] = useState(true);
   
   // Navigation State
   const [currentView, setCurrentView] = useState('archive'); // 'archive' or 'feed'
@@ -24,6 +23,9 @@ function App() {
   // Modal state
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+
+  // Refresh trigger for Archive when new log is added
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     // Fetch user's profile to get username for sharing, and ensure profile exists
@@ -53,38 +55,6 @@ function App() {
       }
     };
     fetchProfile();
-  }, [session]);
-
-  useEffect(() => {
-    // Fetch user's movie logs from Supabase
-    const fetchMovieLogs = async () => {
-      if (!session) {
-        setMovies([]);
-        setLoading(false);
-        return;
-      }
-
-      setLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('movie_logs')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .order('watched_date', { ascending: false });
-
-        if (error) throw error;
-        
-        if (data) {
-          setMovies(data);
-        }
-      } catch (err) {
-        console.error('Error fetching movie logs:', err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMovieLogs();
   }, [session]);
 
   const handleGoogleLogin = async () => {
@@ -169,7 +139,9 @@ function App() {
   };
 
   const handleModalAdd = (newLog) => {
-    setMovies(prevMovies => [newLog, ...prevMovies].sort((a,b) => new Date(b.watched_date) - new Date(a.watched_date)));
+    // Instead of pushing to local array, we just trigger a refresh
+    // of the Archive and Feed components by updating a key/state
+    setRefreshKey(prev => prev + 1);
     setSearchResults([]);
     setSearchQuery('');
   };
@@ -279,36 +251,7 @@ function App() {
         )}
 
         {session && currentView === 'archive' && (
-          <>
-            <h3 className="section-title">My Logs</h3>
-            {loading ? (
-              <div className="loading">Loading your archive...</div>
-            ) : (
-              <div className="movie-grid">
-                {movies.length > 0 ? (
-                  movies.map((movie) => (
-                    <div key={movie.id} className="movie-card">
-                      {movie.poster_path ? (
-                        <img 
-                          src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} 
-                          alt="Movie poster" 
-                          className="movie-poster"
-                        />
-                      ) : (
-                        <div className="movie-poster-placeholder">No Poster</div>
-                      )}
-                      <div className="movie-overlay">
-                        <p className="rating">★ {movie.rating}</p>
-                        {movie.theater_name && <p className="theater">@ {movie.theater_name}</p>}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="empty-state">No movies tracked yet. Search and add your first film!</p>
-                )}
-              </div>
-            )}
-          </>
+          <Archive key={refreshKey} session={session} username={username} />
         )}
 
         {session && currentView === 'feed' && (
