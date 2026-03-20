@@ -3,7 +3,7 @@ import { supabase } from './supabaseClient';
 import LogDetailModal from './LogDetailModal';
 import './Feed.css';
 
-const Feed = ({ session }) => {
+const Feed = ({ session, onUserClick }) => {
   const [feedLogs, setFeedLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedLog, setSelectedLog] = useState(null);
@@ -55,7 +55,11 @@ const Feed = ({ session }) => {
       <div className="feed-timeline">
         {feedLogs.map(log => (
           <div key={log.id} className="feed-post">
-            <div className="feed-post-header">
+            <div 
+              className="feed-post-header clickable-user"
+              onClick={() => onUserClick && onUserClick(log.user_id, log.profiles?.username)}
+              style={{ cursor: 'pointer' }}
+            >
               {log.profiles?.avatar_url ? (
                 <img src={log.profiles.avatar_url} alt="Avatar" className="feed-avatar" />
               ) : (
@@ -63,7 +67,7 @@ const Feed = ({ session }) => {
                   {log.profiles?.username?.charAt(0).toUpperCase() || '?'}
                 </div>
               )}
-              <span className="feed-username">{log.profiles?.username || 'Anonymous'}</span>
+              <span className="feed-username hover-underline">{log.profiles?.username || 'Anonymous'}</span>
             </div>
 
             <div className="feed-post-image" onClick={() => setSelectedLog(log)}>

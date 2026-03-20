@@ -3,7 +3,7 @@ import { supabase } from './supabaseClient';
 import LogDetailModal from './LogDetailModal';
 import './Archive.css';
 
-const Archive = ({ session, username }) => {
+const Archive = ({ session, username, targetUserId = null }) => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState('latest');
@@ -11,10 +11,11 @@ const Archive = ({ session, username }) => {
 
   useEffect(() => {
     fetchArchive();
-  }, [session, sortBy]);
+  }, [session, sortBy, targetUserId]);
 
   const fetchArchive = async () => {
-    if (!session) {
+    const queryUserId = targetUserId || (session ? session.user.id : null);
+    if (!queryUserId) {
       setLogs([]);
       setLoading(false);
       return;
@@ -28,7 +29,7 @@ const Archive = ({ session, username }) => {
           *,
           profiles(username, avatar_url)
         `)
-        .eq('user_id', session.user.id);
+        .eq('user_id', queryUserId);
 
       if (sortBy === 'latest') {
         query = query.order('watched_date', { ascending: false });
@@ -54,7 +55,9 @@ const Archive = ({ session, username }) => {
   return (
     <div className="archive-view">
       <div className="archive-header-controls">
-        <h3 className="section-title">My Archive</h3>
+        <h3 className="section-title">
+          {targetUserId && targetUserId !== session?.user?.id ? `${username}'s Archive` : 'My Archive'}
+        </h3>
         <select 
           className="sort-select" 
           value={sortBy} 
@@ -88,7 +91,11 @@ const Archive = ({ session, username }) => {
               </div>
             ))
           ) : (
-            <p className="empty-state">No movies tracked yet. Search and add your first film!</p>
+            <p className="empty-state">
+              {targetUserId && targetUserId !== session?.user?.id 
+                ? `${username} hasn't tracked any movies yet.` 
+                : "No movies tracked yet. Search and add your first film!"}
+            </p>
           )}
         </div>
       )}

@@ -5,6 +5,8 @@ import MovieModal from './MovieModal';
 import ProfileModal from './ProfileModal';
 import Feed from './Feed';
 import Archive from './Archive';
+import UserSearch from './UserSearch';
+import UserProfile from './UserProfile';
 import { AuthContext } from './AuthContext';
 import './App.css';
 
@@ -12,8 +14,22 @@ function App() {
   const session = useContext(AuthContext);
   
   // Navigation State
-  const [currentView, setCurrentView] = useState('archive'); // 'archive' or 'feed'
+  const [currentView, setCurrentView] = useState('archive'); // 'archive', 'feed', 'searchUsers', 'userProfile'
   const [username, setUsername] = useState(null);
+  const [viewedUserId, setViewedUserId] = useState(null);
+  const [viewedUsername, setViewedUsername] = useState(null);
+
+  const handleUserSelected = (id, targetUsername) => {
+    setViewedUserId(id);
+    setViewedUsername(targetUsername);
+    setCurrentView('userProfile');
+  };
+
+  const handleBackToSearch = () => {
+    setCurrentView('searchUsers');
+    setViewedUserId(null);
+    setViewedUsername(null);
+  };
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
@@ -41,15 +57,29 @@ function App() {
           setUsername(data.username);
         } else {
           // Profile doesn't exist. Create a default one.
-          const fallbackUsername = 'user_' + Math.random().toString(36).substring(2, 8);
-          const { error: insertError } = await supabase
+          const metaUsername = session.user?.user_metadata?.username;
+          let fallbackUsername = metaUsername || ('user_' + Math.random().toString(36).substring(2, 8));
+          
+          let { error: insertError } = await supabase
             .from('profiles')
             .upsert([{ id: session.user.id, username: fallbackUsername, theme_preference: 'light' }]);
           
+          if (insertError) {
+             // If duplicate username, append random string
+             fallbackUsername = fallbackUsername + '_' + Math.random().toString(36).substring(2, 6);
+             const { error: retryError } = await supabase
+               .from('profiles')
+               .upsert([{ id: session.user.id, username: fallbackUsername, theme_preference: 'light' }]);
+             
+             insertError = retryError;
+          }
+
           if (!insertError) {
              setUsername(fallbackUsername);
           } else {
-             console.error('Error auto-creating profile:', insertError.message);
+             console.error('Error auto-creating profile:', insertError?.message);
+             // Even if profile creation fails, we might still want to let them browse
+             setUsername(fallbackUsername); 
           }
         }
       }
@@ -87,13 +117,18 @@ function App() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            username: username
+          }
+        }
       });
 
       if (error) {
         alert(`가입 오류: ${error.message}`);
       } else {
-        // Create profile manually since we don't have a backend trigger
-        if (data.user) {
+        // Check if session exists (email confirmation disabled)
+        if (data.session) {
            const { error: profileError } = await supabase
             .from('profiles')
             .insert([{ id: data.user.id, username: username }]);
@@ -104,6 +139,9 @@ function App() {
             } else {
               alert("회원가입 성공! 이제 로그인 되었습니다.");
             }
+        } else {
+           // No session means email confirmation is required.
+           alert("회원가입 성공! 이메일을 확인하여 인증해주세요. 인증 후 로그인 시 프로필이 생성됩니다.");
         }
       }
     } else {
@@ -111,7 +149,13 @@ function App() {
         email,
         password,
       });
-      if (error) alert(`로그인 오류: ${error.message}`);
+      if (error) {
+        if (error.message === 'Email not confirmed') {
+          alert('이메일 인증이 완료되지 않았습니다. 가입하신 이메일의 수신함을 확인하여 인증을 완료해주세요.');
+        } else {
+          alert(`로그인 오류: ${error.message}`);
+        }
+      }
     }
   };
 
@@ -166,6 +210,12 @@ function App() {
                 Feed
               </button>
               <button 
+                className={`nav-button ${currentView === 'searchUsers' ? 'active' : ''}`} 
+                onClick={() => setCurrentView('searchUsers')}
+              >
+                Find Users
+              </button>
+              <button 
                 className="nav-button" 
                 onClick={() => setIsEditingProfile(true)}
               >
@@ -185,29 +235,31 @@ function App() {
       </header>
       
       <main className="main-content">
-        <section className="profile-section">
-          <h2>{session ? "My Movie Archive" : "Welcome to FILM LOG"}</h2>
-          <p className="bio">
-            {session 
-              ? "Collection of films I've watched and loved." 
-              : "A minimalist space to log your films and discover others."}
-          </p>
-          {session && username && currentView === 'archive' && (
-            <div className="profile-actions">
-              <button 
-                className="action-button share-button" 
-                onClick={() => {
-                  navigator.clipboard.writeText(`${window.location.origin}/user/${username}`);
-                  alert('Profile link copied to clipboard!');
-                }}
-              >
-                Share Profile Link
-              </button>
-            </div>
-          )}
-        </section>
+        {(!session || currentView === 'archive') && (
+          <section className="profile-section">
+            <h2>{session ? "My Movie Archive" : "Welcome to FILM LOG"}</h2>
+            <p className="bio">
+              {session 
+                ? "Collection of films I've watched and loved." 
+                : "A minimalist space to log your films and discover others."}
+            </p>
+            {session && username && (
+              <div className="profile-actions">
+                <button 
+                  className="action-button share-button" 
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/user/${username}`);
+                    alert('Profile link copied to clipboard!');
+                  }}
+                >
+                  Share Profile Link
+                </button>
+              </div>
+            )}
+          </section>
+        )}
 
-        {session && (
+        {session && currentView === 'archive' && (
           <section className="search-section">
             <form onSubmit={handleSearch} className="search-form">
               <input 
@@ -255,7 +307,20 @@ function App() {
         )}
 
         {session && currentView === 'feed' && (
-          <Feed />
+          <Feed session={session} onUserClick={handleUserSelected} />
+        )}
+
+        {session && currentView === 'searchUsers' && (
+          <UserSearch onUserSelected={handleUserSelected} />
+        )}
+
+        {session && currentView === 'userProfile' && viewedUserId && (
+          <UserProfile 
+            session={session} 
+            targetUserId={viewedUserId} 
+            targetUsername={viewedUsername} 
+            onBack={handleBackToSearch} 
+          />
         )}
       </main>
 
