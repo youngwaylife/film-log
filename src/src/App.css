@@ -1,0 +1,367 @@
+/* Pure Black and White Theme */
+:root {
+  --bg-color-light: #ffffff;
+  --text-color-light: #000000;
+  --bg-color-dark: #000000;
+  --text-color-dark: #ffffff;
+  --border-color-light: #000000;
+  --border-color-dark: #ffffff;
+  --transition-speed: 0.3s;
+}
+
+/* Base setup for light/dark mode */
+body {
+  margin: 0;
+  font-family: 'SUIT Variable', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'sans-serif';
+  font-weight: 700; /* Extra bold base weight */
+  background-color: var(--bg-color-light);
+  color: var(--text-color-light);
+  transition: background-color var(--transition-speed), color var(--transition-speed);
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: var(--bg-color-dark);
+    color: var(--text-color-dark);
+  }
+}
+
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--border-color-light);
+  padding-bottom: 1rem;
+  margin-bottom: 4rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .navbar {
+    border-bottom: 2px solid var(--border-color-dark);
+  }
+}
+
+.logo {
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.nav-group {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.nav-button {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color var(--transition-speed);
+}
+
+.nav-button:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+.nav-button.active {
+  font-weight: 900;
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+}
+
+.nav-button.login {
+  font-weight: 800;
+  text-decoration: none;
+  background-color: var(--text-color-light);
+  color: var(--bg-color-light);
+  padding: 0.5rem 1.2rem;
+  border-radius: 0; /* Sharp corners */
+  border: 2px solid var(--text-color-light);
+}
+
+@media (prefers-color-scheme: dark) {
+  .nav-button.login {
+    background-color: var(--text-color-dark);
+    color: var(--bg-color-dark);
+    border: 2px solid var(--text-color-dark);
+  }
+}
+
+.profile-section {
+  text-align: center;
+  margin-bottom: 5rem;
+}
+
+.profile-section h2 {
+  font-size: 3.5rem;
+  font-weight: 900;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+}
+
+.bio {
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.profile-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.action-button {
+  background: var(--bg-color-light);
+  border: 2px solid var(--text-color-light);
+  color: var(--text-color-light);
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+
+.action-button:hover {
+  background: var(--text-color-light);
+  color: var(--bg-color-light);
+}
+
+@media (prefers-color-scheme: dark) {
+  .action-button {
+    background: var(--bg-color-dark);
+    border: 2px solid var(--text-color-dark);
+    color: var(--text-color-dark);
+  }
+  .action-button:hover {
+    background: var(--text-color-dark);
+    color: var(--bg-color-dark);
+  }
+}
+
+/* Grid Layout */
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 2rem;
+}
+
+.movie-card {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  background-color: var(--border-color-light);
+  border: 2px solid var(--border-color-light);
+}
+
+@media (prefers-color-scheme: dark) {
+  .movie-card {
+    background-color: var(--border-color-dark);
+    border: 2px solid var(--border-color-dark);
+  }
+}
+
+.movie-poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-speed);
+}
+
+.movie-card:hover .movie-poster {
+  transform: scale(1.05);
+}
+
+.movie-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85); /* Darker overlay */
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity var(--transition-speed);
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.movie-card:hover .movie-overlay {
+  opacity: 1;
+}
+
+.rating {
+  font-size: 2rem;
+  font-weight: 900;
+  margin: 0 0 0.5rem 0;
+  letter-spacing: 0.1em;
+}
+
+.theater {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.loading, .empty-state {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-top: 4rem;
+  text-transform: uppercase;
+}
+
+.user-email {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.search-section {
+  margin-bottom: 5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.search-form {
+  display: flex;
+  width: 100%;
+  max-width: 800px;
+  border-bottom: 4px solid var(--text-color-light); /* Thicker line */
+  padding-bottom: 0.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .search-form {
+    border-bottom: 4px solid var(--text-color-dark);
+  }
+}
+
+.search-input {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--text-color-light);
+  font-size: 2rem; /* Larger font */
+  font-weight: 900;
+  padding: 0.5rem;
+  outline: none;
+  font-family: inherit;
+}
+
+@media (prefers-color-scheme: dark) {
+  .search-input {
+    color: var(--text-color-dark);
+  }
+}
+
+.search-input::placeholder {
+  color: #888888;
+  font-weight: 600;
+}
+
+.search-button {
+  background: none;
+  border: none;
+  color: var(--text-color-light);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+@media (prefers-color-scheme: dark) {
+  .search-button {
+    color: var(--text-color-dark);
+  }
+}
+
+.search-results {
+  width: 100%;
+  margin-top: 3rem;
+}
+
+.search-results h3 {
+  font-size: 1.8rem;
+  font-weight: 900;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+}
+
+.movie-grid.mini {
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1.5rem;
+}
+
+.movie-title {
+  font-weight: 900;
+  font-size: 1.2rem;
+  margin: 0 0 0.5rem;
+  line-height: 1.2;
+}
+
+.movie-year {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.add-button {
+  margin-top: 1rem;
+  background-color: white;
+  color: black;
+  border: none;
+  border-radius: 0; /* Square button */
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+
+.add-button:hover {
+  transform: scale(1.1);
+  background-color: black;
+  color: white;
+  border: 2px solid white;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 900;
+  margin-bottom: 2rem;
+  border-bottom: 4px solid var(--text-color-light);
+  padding-bottom: 1rem;
+  text-transform: uppercase;
+}
+
+@media (prefers-color-scheme: dark) {
+  .section-title {
+    border-bottom: 4px solid var(--text-color-dark);
+  }
+}
